@@ -1,0 +1,57 @@
+diff --git a/command.go b/command.go
+index c05fed4..a896a5a 100644
+--- a/command.go
++++ b/command.go
+@@ -1338,6 +1338,18 @@ func (c *Command) Commands() []*Command {
+ 	return c.commands
+ }
+ 
++// Deprecations returns the direct subcommands of c that are marked as
++// deprecated, in the same order as Commands().
++func (c *Command) Deprecations() []*Command {
++	var deprecated []*Command
++	for _, sub := range c.Commands() {
++		if len(sub.Deprecated) > 0 {
++			deprecated = append(deprecated, sub)
++		}
++	}
++	return deprecated
++}
++
+ // AddCommand adds one or more commands to this parent command.
+ func (c *Command) AddCommand(cmds ...*Command) {
+ 	for i, x := range cmds {
+diff --git a/command_test.go b/command_test.go
+index a86e57f..afed6a2 100644
+--- a/command_test.go
++++ b/command_test.go
+@@ -2952,3 +2952,27 @@ func TestHelpFuncExecuted(t *testing.T) {
+ 
+ 	checkStringContains(t, output, helpText)
+ }
++
++func TestDeprecations(t *testing.T) {
++	root := &Command{Use: "root"}
++	if got := root.Deprecations(); len(got) != 0 {
++		t.Fatalf("expected no deprecations, got %d", len(got))
++	}
++
++	b := &Command{Use: "b", Deprecated: "use c"}
++	a := &Command{Use: "a", Deprecated: "use d"}
++	ok := &Command{Use: "ok"}
++	root.AddCommand(b, ok, a)
++
++	// Nested deprecated commands are not listed.
++	nested := &Command{Use: "nested", Deprecated: "gone"}
++	ok.AddCommand(nested)
++
++	got := root.Deprecations()
++	if len(got) != 2 || got[0] != a || got[1] != b {
++		t.Fatalf("unexpected deprecations: %v", got)
++	}
++	if d := ok.Deprecations(); len(d) != 1 || d[0] != nested {
++		t.Fatalf("unexpected nested deprecations: %v", d)
++	}
++}
+ M command.go
+ M command_test.go

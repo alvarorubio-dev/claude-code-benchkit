@@ -15,3 +15,6 @@ date,repo,arm,run,claude_version,model,input_tokens,output_tokens,cache_read_tok
 2026-10-31,express,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,2269,298469,42897,0.2242,10,1,yes,0,yes,yes,no,yes,
 2026-10-31,flask,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,2941,343799,4402,0.0814,12,1,yes,0,yes,yes,no,yes,
 2026-10-31,cobra,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,10,1758,181447,42879,0.2073,7,1,yes,0,yes,yes,no,yes,
+2026-11-01,express,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,20,4497,463764,61605,0.3378,13,2,yes,0,yes,yes,no,yes,
+2026-11-01,flask,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,20,3523,480808,48072,0.2756,16,1,yes,0,yes,yes,no,yes,
+2026-11-01,cobra,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,1740,289705,43780,0.2215,9,1,yes,0,yes,yes,no,yes,

@@ -1,0 +1,50 @@
+diff --git a/lib/response.js b/lib/response.js
+index 0d5a4ae4..57f6bef2 100644
+--- a/lib/response.js
++++ b/lib/response.js
+@@ -331,6 +331,43 @@ res.sendStatus = function sendStatus(statusCode) {
+   return this.send(body);
+ };
+ 
++/**
++ * Send an RFC 9457 `application/problem+json` response.
++ *
++ * Sets the response status to `status` and the body to a problem
++ * details object with `type` ("about:blank"), `title` (the standard
++ * status message), `status` and, when given, `detail`.
++ *
++ * Examples:
++ *
++ *     res.problem(404, 'User 42 was not found');
++ *     res.problem(400, 'Invalid input', { errors: ['name is required'] });
++ *
++ * @param {number} status
++ * @param {string} [detail]
++ * @param {object} [extensions] extra members merged into the body
++ * @public
++ */
++
++res.problem = function problem(status, detail, extensions) {
++  var body = { type: 'about:blank', title: statuses.message[status] || String(status), status: status };
++
++  if (detail !== undefined && detail !== null) {
++    body.detail = String(detail);
++  }
++
++  if (extensions && typeof extensions === 'object') {
++    Object.keys(extensions).forEach(function (key) {
++      if (!(key in body)) body[key] = extensions[key];
++    });
++  }
++
++  this.status(status);
++  this.set('Content-Type', 'application/problem+json; charset=utf-8');
++
++  return this.json(body);
++};
++
+ /**
+  * Transfer the file at the given `path`.
+  *
+ M lib/response.js
+?? test/res.problem.js

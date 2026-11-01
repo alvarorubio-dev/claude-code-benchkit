@@ -1,0 +1,52 @@
+diff --git a/command.go b/command.go
+index c05fed4..e975373 100644
+--- a/command.go
++++ b/command.go
+@@ -1657,6 +1657,17 @@ func (c *Command) HasHelpSubCommands() bool {
+ 	return false
+ }
+ 
++// Deprecations returns the direct subcommands that are marked as deprecated.
++func (c *Command) Deprecations() []*Command {
++	var deprecated []*Command
++	for _, sub := range c.commands {
++		if len(sub.Deprecated) != 0 {
++			deprecated = append(deprecated, sub)
++		}
++	}
++	return deprecated
++}
++
+ // HasAvailableSubCommands determines if a command has available sub commands that
+ // need to be shown in the usage/help default template under 'available commands'.
+ func (c *Command) HasAvailableSubCommands() bool {
+diff --git a/command_test.go b/command_test.go
+index a86e57f..e42a56a 100644
+--- a/command_test.go
++++ b/command_test.go
+@@ -2952,3 +2952,23 @@ func TestHelpFuncExecuted(t *testing.T) {
+ 
+ 	checkStringContains(t, output, helpText)
+ }
++
++func TestDeprecations(t *testing.T) {
++	root := &Command{Use: "root"}
++	old := &Command{Use: "old", Deprecated: "use new", Run: emptyRun}
++	cur := &Command{Use: "new", Run: emptyRun}
++	nested := &Command{Use: "nested", Deprecated: "gone", Run: emptyRun}
++	cur.AddCommand(nested)
++	root.AddCommand(old, cur)
++
++	got := root.Deprecations()
++	if len(got) != 1 || got[0] != old {
++		t.Fatalf("expected only %q, got %v", old.Name(), got)
++	}
++	if d := cur.Deprecations(); len(d) != 1 || d[0] != nested {
++		t.Fatalf("expected nested deprecated command, got %v", d)
++	}
++	if d := old.Deprecations(); len(d) != 0 {
++		t.Fatalf("expected none, got %v", d)
++	}
++}
+ M command.go
+ M command_test.go

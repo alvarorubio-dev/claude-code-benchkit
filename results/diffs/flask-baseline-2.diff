@@ -1,0 +1,91 @@
+diff --git a/src/flask/cli.py b/src/flask/cli.py
+index c4ce9ba6..6bd6b16d 100644
+--- a/src/flask/cli.py
++++ b/src/flask/cli.py
+@@ -4,6 +4,7 @@ import ast
+ import collections.abc as cabc
+ import importlib.metadata
+ import inspect
++import json
+ import os
+ import platform
+ import re
+@@ -1056,13 +1057,17 @@ def shell_command() -> None:
+     ),
+ )
+ @click.option("--all-methods", is_flag=True, help="Show HEAD and OPTIONS methods.")
++@click.option("--json", "as_json", is_flag=True, help="Output routes as JSON.")
+ @with_appcontext
+-def routes_command(sort: str, all_methods: bool) -> None:
++def routes_command(sort: str, all_methods: bool, as_json: bool) -> None:
+     """Show all registered routes with endpoints and methods."""
+     rules = list(current_app.url_map.iter_rules())
+ 
+     if not rules:
+-        click.echo("No routes were registered.")
++        if as_json:
++            click.echo("[]")
++        else:
++            click.echo("No routes were registered.")
+         return
+ 
+     ignored_methods = set() if all_methods else {"HEAD", "OPTIONS"}
+@@ -1097,8 +1102,20 @@ def routes_command(sort: str, all_methods: bool) -> None:
+     except ValueError:
+         pass
+ 
++    if as_json:
++        keys = [h.lower() for h in headers]
++        data = []
++
++        for row in rows:
++            item = dict(zip(keys, row, strict=True))
++            item["methods"] = [m for m in row[1].split(", ") if m]
++            data.append(item)
++
++        click.echo(json.dumps(data, indent=2))
++        return
++
+     rows.insert(0, headers)
+-    widths = [max(len(row[i]) for row in rows) for i in range(len(headers))]
++    widths =[max(len(row[i]) for row in rows) for i in range(len(headers))]
+     rows.insert(1, ["-" * w for w in widths])
+     template = "  ".join(f"{{{i}:<{w}}}" for i, w in enumerate(widths))
+ 
+diff --git a/tests/test_cli.py b/tests/test_cli.py
+index f3b9a850..c8a39494 100644
+--- a/tests/test_cli.py
++++ b/tests/test_cli.py
+@@ -485,6 +485,30 @@ class TestRoutes:
+         match_order = [r.endpoint for r in app.url_map.iter_rules()]
+         self.expect_order(match_order, invoke(["routes", "-s", "match"]).output)
+ 
++    def test_json(self, invoke):
++        import json
++
++        result = invoke(["routes", "--json"])
++        assert result.exit_code == 0
++        data = json.loads(result.output)
++        assert [r["endpoint"] for r in data] == ["aaa_post", "static", "yyy_get_post"]
++        by_endpoint = {r["endpoint"]: r for r in data}
++        assert by_endpoint["yyy_get_post"]["methods"] == ["GET", "POST"]
++        assert by_endpoint["yyy_get_post"]["rule"] == "/get_post/<int:x>/<int:y>"
++        assert by_endpoint["aaa_post"]["methods"] == ["POST"]
++
++    def test_json_all_methods(self, invoke):
++        import json
++
++        data = json.loads(invoke(["routes", "--json", "--all-methods"]).output)
++        by_endpoint = {r["endpoint"]: r for r in data}
++        assert by_endpoint["yyy_get_post"]["methods"] == [
++            "GET",
++            "HEAD",
++            "OPTIONS",
++            "POST",
++        ]
++
+     def test_all_methods(self, invoke):
+         output = invoke(["routes"]).output
+         assert "GET, HEAD, OPTIONS, POST" not in output
+ M src/flask/cli.py
+ M tests/test_cli.py

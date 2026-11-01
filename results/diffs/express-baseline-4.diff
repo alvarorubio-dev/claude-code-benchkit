@@ -1,0 +1,47 @@
+diff --git a/lib/response.js b/lib/response.js
+index 0d5a4ae4..e30260b8 100644
+--- a/lib/response.js
++++ b/lib/response.js
+@@ -249,6 +249,40 @@ res.json = function json(obj) {
+   return this.send(body);
+ };
+ 
++/**
++ * Send an RFC 9457 `application/problem+json` response.
++ *
++ * Examples:
++ *
++ *     res.problem(404, 'User 42 not found');
++ *     res.problem(422, 'Invalid input', { errors: [] });
++ *
++ * @param {number} status
++ * @param {string} [detail]
++ * @param {object} [extensions] additional members (e.g. type, instance)
++ * @public
++ */
++
++res.problem = function problem(status, detail, extensions) {
++  status = Number(status);
++  if (!Number.isInteger(status) || status < 400 || status > 599) {
++    throw new RangeError('res.problem status must be an integer 4xx or 5xx code');
++  }
++
++  var obj = {};
++  if (extensions && typeof extensions === 'object') {
++    Object.assign(obj, extensions);
++  }
++  if (obj.type === undefined) obj.type = 'about:blank';
++  obj.title = statuses.message[status] || 'Unknown Error';
++  obj.status = status;
++  if (detail !== undefined && detail !== null) obj.detail = String(detail);
++
++  this.status(status);
++  this.set('Content-Type', 'application/problem+json');
++  return this.json(obj);
++};
++
+ /**
+  * Send JSON response with JSONP callback support.
+  *
+ M lib/response.js
+?? test/res.problem.js

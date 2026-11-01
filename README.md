@@ -2,15 +2,15 @@
 
 Reproducible benchmarks for two common Claude Code "fixes": filtering test output to save tokens, and stopping Claude from saying "done" when it isn't. Three public repos pinned to exact commits, scripted sessions, and a checker that runs the tests itself instead of trusting Claude's word.
 
-**Result (2026-10-31, Claude Code 2.1.316, Sonnet 5.5):** neither problem showed up.
+**Result (2026-10-31, Claude Code 2.1.316, Sonnet 5.5):** neither problem showed up in this small benchmark.
 
 | Question | Finding |
 |---|---|
-| How big is raw test output? | 10,000–18,000 tokens per full run; a summary-keeping filter cuts the large runs by 93–99% ([results/benchmark-a.md](results/benchmark-a.md)) |
-| Does Claude read it raw? | No. In 3 of 3 logged sessions it ran the suite with `\| tail -15` or `\| tail -30`; 586–938 characters reached its context ([results/commands/](results/commands/)) |
-| Does Claude claim "done" when it isn't? | 0 of 13 valid sessions ([results/benchmark-b-sessions.csv](results/benchmark-b-sessions.csv)) |
+| How big is raw test output? | About 10,000–18,000 estimated tokens per verbose run; a summary-keeping filter cuts that output by 93–99% ([results/benchmark-a.md](results/benchmark-a.md)) |
+| Did Claude read it raw? | Not in the 6 sessions with logged commands (3 with the plugin, 3 without): it piped the suite through `tail` or `grep`, and 369–938 characters reached its context ([results/commands/](results/commands/)). Caveat: without `pipefail` that pipe hides the test exit code |
+| Did a false "done" get past the checker? | 0 of 16 valid sessions; three tasks repeated, so the 95% upper bound is still about 17% ([results/benchmark-b-sessions.csv](results/benchmark-b-sessions.csv), [results/diffs/](results/diffs/)) |
 
-Small study: one model, one machine, small well-scoped tasks. Read it as "did not show up here", not "does not exist". Rerun it and send your numbers, especially if they disagree.
+Read it as "not seen here", not "solved". The checker runs the full suite and greps for the new code and its test; Claude wrote both, so it is not a hidden acceptance test. Rerun it and send your numbers, especially if they disagree.
 
 ## Repos
 
@@ -42,7 +42,7 @@ tests/test-filters.sh            # 18 checks of the filters, synthetic logs
 | `run-bench.sh`, `lib-filters.sh` | Benchmark A and the filters |
 | `bench-b.sh` | Benchmark B session runner and checker |
 | `usage-pack/` | The test-output filter as a Claude Code plugin (experiment; 30 tests) |
-| `results/` | The data behind the findings, including 3 runs discarded for a checker bug (marked `valid=no`) |
+| `results/` | The data: per-session CSV (3 runs discarded for a checker bug, marked `valid=no`), commands Claude ran, diffs of every valid session |
 
 ## Notes
 

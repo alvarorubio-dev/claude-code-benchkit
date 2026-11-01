@@ -1,0 +1,42 @@
+diff --git a/lib/response.js b/lib/response.js
+index 0d5a4ae4..64d5700d 100644
+--- a/lib/response.js
++++ b/lib/response.js
+@@ -249,6 +249,35 @@ res.json = function json(obj) {
+   return this.send(body);
+ };
+ 
++/**
++ * Send an RFC 9457 `application/problem+json` response.
++ *
++ * Examples:
++ *
++ *     res.problem(404, 'User 42 not found');
++ *     res.problem(400);
++ *
++ * @param {number} status HTTP status code (100-999)
++ * @param {string} [detail] human-readable explanation
++ * @public
++ */
++
++res.problem = function problem(status, detail) {
++  if (!Number.isInteger(status) || status < 100 || status > 999) {
++    throw new TypeError('res.problem() status must be an integer between 100 and 999');
++  }
++
++  var obj = { type: 'about:blank' };
++  var title = statuses.message[status];
++  if (title) obj.title = title;
++  obj.status = status;
++  if (detail !== undefined && detail !== null) obj.detail = String(detail);
++
++  this.status(status);
++  this.set('Content-Type', 'application/problem+json');
++  return this.json(obj);
++};
++
+ /**
+  * Send JSON response with JSONP callback support.
+  *
+ M lib/response.js
+?? test/res.problem.js

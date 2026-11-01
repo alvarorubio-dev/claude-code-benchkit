@@ -1,0 +1,98 @@
+diff --git a/CHANGES.rst b/CHANGES.rst
+index c1bcf629..c652c7ab 100644
+--- a/CHANGES.rst
++++ b/CHANGES.rst
+@@ -5,6 +5,7 @@ Unreleased
+ 
+ -   Drop support for Python 3.9 and 3.10. :pr:`5730` :pr:`6168`
+ -   Remove previously deprecated code: ``__version__``. :pr:`5648`
++-   ``flask routes --json`` outputs the route table as JSON.
+ -   ``RequestContext`` has merged with ``AppContext``. ``RequestContext`` is now
+     a deprecated alias. If an app context is already pushed, it is not reused
+     when dispatching a request. This greatly simplifies the internal code for
+diff --git a/src/flask/cli.py b/src/flask/cli.py
+index c4ce9ba6..b03f3cfa 100644
+--- a/src/flask/cli.py
++++ b/src/flask/cli.py
+@@ -1056,13 +1056,17 @@ def shell_command() -> None:
+     ),
+ )
+ @click.option("--all-methods", is_flag=True, help="Show HEAD and OPTIONS methods.")
++@click.option("--json", "as_json", is_flag=True, help="Output the routes as JSON.")
+ @with_appcontext
+-def routes_command(sort: str, all_methods: bool) -> None:
++def routes_command(sort: str, all_methods: bool, as_json: bool) -> None:
+     """Show all registered routes with endpoints and methods."""
+     rules = list(current_app.url_map.iter_rules())
+ 
+     if not rules:
+-        click.echo("No routes were registered.")
++        if as_json:
++            click.echo("[]")
++        else:
++            click.echo("No routes were registered.")
+         return
+ 
+     ignored_methods = set() if all_methods else {"HEAD", "OPTIONS"}
+@@ -1097,6 +1101,14 @@ def routes_command(sort: str, all_methods: bool) -> None:
+     except ValueError:
+         pass
+ 
++    if as_json:
++        import json
++
++        keys = [h.lower() for h in headers]
++        data = [dict(zip(keys, row, strict=True)) for row in rows]
++        click.echo(json.dumps(data, indent=2))
++        return
++
+     rows.insert(0, headers)
+     widths = [max(len(row[i]) for row in rows) for i in range(len(headers))]
+     rows.insert(1, ["-" * w for w in widths])
+diff --git a/tests/test_cli.py b/tests/test_cli.py
+index f3b9a850..6656d65e 100644
+--- a/tests/test_cli.py
++++ b/tests/test_cli.py
+@@ -1,6 +1,7 @@
+ # This file was part of Flask-CLI and was modified under the terms of
+ # its Revised BSD License. Copyright © 2015 CERN.
+ import importlib.metadata
++import json
+ import os
+ import platform
+ import ssl
+@@ -492,6 +493,31 @@ class TestRoutes:
+         output = invoke(["routes", "--all-methods"]).output
+         assert "GET, HEAD, OPTIONS, POST" in output
+ 
++    def test_json(self, invoke):
++        result = invoke(["routes", "--json"])
++        assert result.exit_code == 0
++        data = json.loads(result.output)
++        assert [r["endpoint"] for r in data] == ["aaa_post", "static", "yyy_get_post"]
++        assert set(data[0]) == {"endpoint", "methods", "rule"}
++        assert "HEAD" not in data[1]["methods"]
++
++        data = json.loads(invoke(["routes", "--json", "--all-methods"]).output)
++        assert "HEAD" in next(r for r in data if r["endpoint"] == "static")["methods"]
++
++    def test_json_no_routes(self, runner):
++        app = Flask(__name__, static_folder=None)
++        cli = FlaskGroup(create_app=lambda: app)
++        result = runner.invoke(cli, ["routes", "--json"])
++        assert result.exit_code == 0
++        assert json.loads(result.output) == []
++
++    def test_json_subdomain(self, runner):
++        app = Flask(__name__, static_folder=None)
++        app.add_url_rule("/a", subdomain="a", endpoint="a")
++        cli = FlaskGroup(create_app=lambda: app)
++        result = runner.invoke(cli, ["routes", "--json"])
++        assert json.loads(result.output)[0]["subdomain"] == "a"
++
+     def test_no_routes(self, runner):
+         app = Flask(__name__, static_folder=None)
+         cli = FlaskGroup(create_app=lambda: app)
+ M CHANGES.rst
+ M src/flask/cli.py
+ M tests/test_cli.py
