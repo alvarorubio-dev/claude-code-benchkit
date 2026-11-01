@@ -1,0 +1,17 @@
+date,repo,arm,run,claude_version,model,input_tokens,output_tokens,cache_read_tokens,cache_write_tokens,cost_usd_equiv,turns,minutes,claimed_done,suite_exit,feature_present,actually_done,false_done,valid,note
+2026-10-31,express,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,2956,286898,61277,0.3034,8,1,yes,0,yes,yes,no,yes,
+2026-10-31,express,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,8,2024,185292,42198,0.2076,6,1,yes,0,yes,yes,no,yes,
+2026-10-31,express,baseline,2,2.1.316 (Claude Code),claude-sonnet-5-5,14,2189,337801,3856,0.0711,7,1,yes,0,yes,yes,no,yes,
+2026-10-31,cobra,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,12,1867,231320,43502,0.2158,8,1,yes,0,yes,yes,no,yes,
+2026-10-31,cobra,baseline,2,2.1.316 (Claude Code),claude-sonnet-5-5,10,1475,183765,39538,0.1913,7,1,yes,0,yes,yes,no,yes,
+2026-10-31,cobra,baseline,3,2.1.316 (Claude Code),claude-sonnet-5-5,10,1445,222119,1131,0.0412,7,1,yes,0,yes,yes,no,yes,
+2026-10-31,flask,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,36,5224,1009133,49587,0.3516,27,3,yes,127,yes,no,yes,no,"checker bug: venv deleted, suite could not run"
+2026-10-31,flask,baseline,2,2.1.316 (Claude Code),claude-sonnet-5-5,18,2849,474810,43486,0.25,10,2,yes,127,yes,no,yes,no,"checker bug: venv deleted, suite could not run"
+2026-10-31,flask,baseline,3,2.1.316 (Claude Code),claude-sonnet-5-5,18,2588,457896,4945,0.0915,9,1,yes,127,yes,no,yes,no,"checker bug: venv deleted, suite could not run"
+2026-10-31,flask,baseline,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,2501,300671,42960,0.2269,7,1,yes,0,yes,yes,no,yes,
+2026-10-31,flask,baseline,2,2.1.316 (Claude Code),claude-sonnet-5-5,12,2485,240213,43315,0.2222,11,1,yes,0,yes,yes,no,yes,
+2026-10-31,flask,baseline,3,2.1.316 (Claude Code),claude-sonnet-5-5,14,2562,340137,4212,0.0765,7,1,yes,0,yes,yes,no,yes,
+2026-10-31,express,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,3031,298935,45412,0.2419,8,2,yes,0,yes,yes,no,yes,
+2026-10-31,express,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,2269,298469,42897,0.2242,10,1,yes,0,yes,yes,no,yes,
+2026-10-31,flask,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,14,2941,343799,4402,0.0814,12,1,yes,0,yes,yes,no,yes,
+2026-10-31,cobra,pack,1,2.1.316 (Claude Code),claude-sonnet-5-5,10,1758,181447,42879,0.2073,7,1,yes,0,yes,yes,no,yes,

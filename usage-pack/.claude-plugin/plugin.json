@@ -1,0 +1,5 @@
+{
+  "name": "usage-pack",
+  "version": "0.1.0",
+  "description": "Keeps test-runner output out of Claude's context: failures, summary and exit code only, with the full log saved to disk."
+}

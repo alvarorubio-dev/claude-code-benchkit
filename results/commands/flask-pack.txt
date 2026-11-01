@@ -1,0 +1,1 @@
+$ (.venv/Scripts/python -m pytest -q 2>&1 || python -m pytest -q 2>&1) | tail -15

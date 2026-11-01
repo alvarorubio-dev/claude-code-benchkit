@@ -1,0 +1,4 @@
+$ ls -a | head -30 && grep -n "res.json = \|res.sendStatus = \|^res.links" lib/response.js && ls test | head -50
+$ cat test/res.sendStatus.js | head -30; grep -n '"test"' package.json
+$ npm test 2>&1 | tail -30
+$ npm test 2>&1 | grep -E "failing|problem" ; npx eslint lib/response.js test/res.problem.js && echo lint ok
