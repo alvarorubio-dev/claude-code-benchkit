@@ -6,9 +6,9 @@ Reproducible benchmarks for two common Claude Code "fixes": filtering test outpu
 
 | Question | Finding |
 |---|---|
-| How big is raw test output? | About 10,000–18,000 estimated tokens per verbose run; a summary-keeping filter cuts that output by 93–99% ([results/benchmark-a.md](results/benchmark-a.md)) |
-| Did Claude read it raw? | Not in the 6 sessions with logged commands (3 with the plugin, 3 without): it piped the suite through `tail` or `grep`, and 369–938 characters reached its context ([results/commands/](results/commands/)). Caveat: without `pipefail` that pipe hides the test exit code |
-| Did a false "done" get past the checker? | 0 of 16 valid sessions; three tasks repeated, so the 95% upper bound is still about 17% ([results/benchmark-b-sessions.csv](results/benchmark-b-sessions.csv), [results/diffs/](results/diffs/)) |
+| How big is raw test output? | About 10,000–18,000 estimated tokens per verbose run; on the verbose runs with one failing test, a summary-keeping filter cuts that output by 95–99% ([results/benchmark-a.md](results/benchmark-a.md)) |
+| Did Claude read it raw? | Not in the 6 sessions with logged commands (3 with the plugin, 3 without): it piped the suite through `tail` or `grep`; each test command returned 369–931 characters ([results/commands/](results/commands/)). Caveat: without `pipefail` that pipe hides the test exit code |
+| Did Claude's "done" disagree with the checker? | 0 of 16 valid sessions; three tasks repeated, so the 95% upper bound is still about 17% ([results/benchmark-b-sessions.csv](results/benchmark-b-sessions.csv), [results/diffs/](results/diffs/)) |
 
 Read it as "not seen here", not "solved". The checker runs the full suite and greps for the new code and its test; Claude wrote both, so it is not a hidden acceptance test. Rerun it and send your numbers, especially if they disagree.
 
